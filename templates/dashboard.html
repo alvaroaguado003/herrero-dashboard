@@ -228,6 +228,19 @@ input.field:focus,select.field:focus{border-color:var(--red)}
 </div>
 
 <!-- IG filter bar (sticky, shown only on instagram tab) -->
+<div class="filter-bar" id="utm-filter-bar" style="display:none">
+  <button class="pbtn on" id="utm-pb-all"  onclick="utmSetPeriod('all',this)">Todo</button>
+  <button class="pbtn"    id="utm-pb-7"    onclick="utmSetPeriod(7,this)">7 días</button>
+  <button class="pbtn"    id="utm-pb-30"   onclick="utmSetPeriod(30,this)">30 días</button>
+  <button class="pbtn"    id="utm-pb-90"   onclick="utmSetPeriod(90,this)">90 días</button>
+  <div class="fsep"></div>
+  <input class="fdate" type="date" id="utm-date-from" onchange="utmSetCustomDate()" title="Desde">
+  <span style="color:var(--text2);font-size:11px">→</span>
+  <input class="fdate" type="date" id="utm-date-to"   onchange="utmSetCustomDate()" title="Hasta">
+  <div class="fsep"></div>
+  <div class="fcount"><span id="utm-filter-count">—</span> disparos</div>
+</div>
+
 <div class="filter-bar" id="ig-filter-bar" style="display:none">
   <button class="pbtn on" id="ig-pb-all"  onclick="igSetPeriod('all',this)">Todo</button>
   <button class="pbtn"    id="ig-pb-7"    onclick="igSetPeriod(7,this)">7 días</button>
@@ -760,9 +773,12 @@ function renderUTMs() {
   if (RENDERED.utm) return;
   RENDERED.utm = true;
 
-  const disparos = SH.disparos || [];
-  const convs    = SH.conversaciones || [];
-  const agendas  = SH.agendas || [];
+  const dateField = r => r['Fecha subscripcion'] || r['fecha_subscripcion'] || '';
+  const disparos = (SH.disparos       || []).filter(r => utmMatchDate(dateField(r)));
+  const convs    = (SH.conversaciones || []).filter(r => utmMatchDate(dateField(r)));
+  const agendas  = (SH.agendas        || []).filter(r => utmMatchDate(dateField(r)));
+
+  document.getElementById('utm-filter-count').textContent = fmtN(disparos.length);
 
   document.getElementById('uDisparos').textContent = fmtN(disparos.length);
   document.getElementById('uConvs').textContent    = fmtN(convs.length);
@@ -923,6 +939,50 @@ function renderIgContent() {
     </a>`).join('');
 }
 
+// ── UTM filter state ──────────────────────────────────────────────────────────
+let utmPeriod = 'all', utmDateFrom = '', utmDateTo = '';
+
+function parseSheetDate(str) {
+  if (!str) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0,10);       // 2026-04-06 21:56:11
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(str)) {                            // 22/04/2026
+    const [d,m,y] = str.split('/'); return `${y}-${m}-${d}`;
+  }
+  return str.slice(0,10);
+}
+
+function utmMatchDate(str) {
+  const d = parseSheetDate(str);
+  if (!d) return true;
+  const t=today();
+  switch(utmPeriod) {
+    case 7:        return d >= daysAgo(7)  && d <= t;
+    case 30:       return d >= daysAgo(30) && d <= t;
+    case 90:       return d >= daysAgo(90) && d <= t;
+    case 'custom': return (!utmDateFrom||d>=utmDateFrom) && (!utmDateTo||d<=utmDateTo);
+    default:       return true;
+  }
+}
+
+function utmSetPeriod(p, btn) {
+  utmPeriod = p; utmDateFrom = ''; utmDateTo = '';
+  document.querySelectorAll('#utm-filter-bar .pbtn[id^="utm-pb"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('utm-date-from').value = '';
+  document.getElementById('utm-date-to').value   = '';
+  RENDERED.utm = false; renderUTMs();
+}
+
+function utmSetCustomDate() {
+  utmDateFrom = document.getElementById('utm-date-from').value;
+  utmDateTo   = document.getElementById('utm-date-to').value;
+  if (utmDateFrom || utmDateTo) {
+    utmPeriod = 'custom';
+    document.querySelectorAll('#utm-filter-bar .pbtn[id^="utm-pb"]').forEach(b=>b.classList.remove('on'));
+  }
+  RENDERED.utm = false; renderUTMs();
+}
+
 function igSetPeriod(p,btn){
   igPeriod=p;
   document.querySelectorAll('#ig-filter-bar .pbtn[id^="ig-pb"]').forEach(b=>b.classList.remove('on'));
@@ -944,14 +1004,15 @@ function switchPage(name, btn) {
   btn.classList.add('on');
   currentPage = name;
 
-  const gf = document.getElementById('global-filter-bar');
-  const igf = document.getElementById('ig-filter-bar');
-  const cf = document.querySelector('.closer-filter');
+  const gf   = document.getElementById('global-filter-bar');
+  const utmf = document.getElementById('utm-filter-bar');
+  const igf  = document.getElementById('ig-filter-bar');
 
   document.querySelectorAll('.pipeline-filter').forEach(el=>el.style.display=name==='pipeline'?'':'none');
   document.querySelectorAll('.clientes-filter').forEach(el=>el.style.display=name==='clientes'?'':'none');
-  gf.style.display = ['pipeline','clientes'].includes(name) ? 'flex' : 'none';
-  igf.style.display = name==='instagram' ? 'flex' : 'none';
+  gf.style.display   = ['pipeline','clientes'].includes(name) ? 'flex' : 'none';
+  utmf.style.display = name==='utm'       ? 'flex' : 'none';
+  igf.style.display  = name==='instagram' ? 'flex' : 'none';
 
   RENDERED = {};
   if(name==='pipeline')   renderPipeline();
