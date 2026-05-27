@@ -229,6 +229,10 @@ input.field:focus,select.field:focus{border-color:var(--red)}
 
 <!-- IG filter bar (sticky, shown only on instagram tab) -->
 <div class="filter-bar" id="utm-filter-bar" style="display:none">
+  <button class="pbtn on" id="utm-src-disparos"      onclick="utmSetSource('disparos',this)">Disparos</button>
+  <button class="pbtn"    id="utm-src-conversaciones" onclick="utmSetSource('conversaciones',this)">Conversaciones</button>
+  <button class="pbtn"    id="utm-src-agendas"        onclick="utmSetSource('agendas',this)">Agendas</button>
+  <div class="fsep"></div>
   <button class="pbtn on" id="utm-pb-all"  onclick="utmSetPeriod('all',this)">Todo</button>
   <button class="pbtn"    id="utm-pb-7"    onclick="utmSetPeriod(7,this)">7 días</button>
   <button class="pbtn"    id="utm-pb-30"   onclick="utmSetPeriod(30,this)">30 días</button>
@@ -238,7 +242,7 @@ input.field:focus,select.field:focus{border-color:var(--red)}
   <span style="color:var(--text2);font-size:11px">→</span>
   <input class="fdate" type="date" id="utm-date-to"   onchange="utmSetCustomDate()" title="Hasta">
   <div class="fsep"></div>
-  <div class="fcount"><span id="utm-filter-count">—</span> disparos</div>
+  <div class="fcount"><span id="utm-filter-count">—</span> registros</div>
 </div>
 
 <div class="filter-bar" id="ig-filter-bar" style="display:none">
@@ -269,10 +273,9 @@ input.field:focus,select.field:focus{border-color:var(--red)}
     <div class="vkpi" style="--c:var(--won)"><div class="vkpi-lbl">Ventas Cerradas</div><div class="vkpi-val" id="kVentas">—</div><div class="vkpi-desc">Venta Cerrada</div></div>
     <div class="vkpi" style="--c:var(--nsp)"><div class="vkpi-lbl">No Se Presenta</div><div class="vkpi-val" id="kNsp">—</div><div class="vkpi-desc">NSP</div></div>
   </div>
-  <div class="kpi-grid g3 mb2" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kpi-grid mb2" style="grid-template-columns:repeat(2,1fr)">
     <div class="vkpi" style="--c:var(--lost)"><div class="vkpi-lbl">Cancelados</div><div class="vkpi-val" id="kCancelado">—</div><div class="vkpi-desc">Cancelado</div></div>
     <div class="vkpi" style="--c:#dc2626"><div class="vkpi-lbl">Venta Perdida</div><div class="vkpi-val" id="kPerdida">—</div><div class="vkpi-desc">Cualificaron pero no cerraron</div></div>
-    <div class="vkpi" style="--c:var(--red)"><div class="vkpi-lbl">Ingresos (valor)</div><div class="vkpi-val sm" id="kIngresos">—</div><div class="vkpi-desc">Valor oportunidades ganadas</div></div>
   </div>
 
   <div class="rates-grid">
@@ -394,7 +397,7 @@ input.field:focus,select.field:focus{border-color:var(--red)}
       <input class="tbl-search" id="cSearch" placeholder="Buscar cliente..." oninput="renderClientesTable()">
       <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace" id="cTableCount">—</div>
     </div>
-    <table><thead><tr><th>Cliente</th><th>Etapa</th><th class="num">Días programa</th><th class="num">Valor</th><th class="num">Entrada</th></tr></thead>
+    <table><thead><tr><th>Cliente</th><th>Etapa</th><th class="num">Días programa</th><th class="num">Entrada</th></tr></thead>
     <tbody id="clientesBody"></tbody></table>
   </div>
 </div>
@@ -418,12 +421,12 @@ input.field:focus,select.field:focus{border-color:var(--red)}
   </div>
 
   <div class="g2 mb2">
-    <div class="chart-card"><div class="chart-title">Top Campañas (Disparos)</div><div class="chart-sub">UTM_Campaign — leads por campaña</div><canvas id="uCamChart" height="220"></canvas></div>
+    <div class="chart-card"><div class="chart-title" id="uCamTitle">Top Campañas</div><div class="chart-sub">UTM_Campaign — registros por campaña</div><canvas id="uCamChart" height="220"></canvas></div>
     <div class="chart-card"><div class="chart-title">Tipo de Contenido</div><div class="chart-sub">UTM_Content — qué formato convierte</div><canvas id="uContentChart" height="220"></canvas></div>
   </div>
 
-  <div class="sh gap">Timeline de disparos</div>
-  <div class="chart-card mb2"><div class="chart-title">Leads por semana</div><div class="chart-sub">disparos · fecha de suscripción</div><canvas id="uTimeChart" height="130"></canvas></div>
+  <div class="sh gap" id="uTimelineTitle">Timeline de registros</div>
+  <div class="chart-card mb2"><div class="chart-title">Registros por semana</div><div class="chart-sub" id="uTimeChartSub">fecha de suscripción</div><canvas id="uTimeChart" height="130"></canvas></div>
 
   <div class="sh gap">Top campañas — detalle</div>
   <div class="tbl-wrap mb2">
@@ -433,13 +436,13 @@ input.field:focus,select.field:focus{border-color:var(--red)}
     </div>
     <table><thead><tr>
       <th>Campaña (UTM)</th>
-      <th class="num">Disparos</th>
+      <th class="num" id="uColHeader">Registros</th>
       <th class="num">%</th>
     </tr></thead>
     <tbody id="utmTableBody"></tbody></table>
   </div>
 
-  <div class="sh">Top usuarios IG disparados</div>
+  <div class="sh" id="uUsersTitle">Top usuarios IG</div>
   <div class="tbl-wrap">
     <table><thead><tr><th>Usuario IG</th><th>Campaña</th><th class="num">Fecha</th></tr></thead>
     <tbody id="igUsersBody"></tbody></table>
@@ -637,7 +640,6 @@ function renderPipeline() {
   const nsp      = fp.filter(o=>o.group==='nsp').length;
   const cancelado= fp.filter(o=>o.group==='lost'&&o.stage==='Cancelado').length;
   const perdida  = fp.filter(o=>o.group==='lost'&&o.stage==='Venta Perdida').length;
-  const ingresos = fp.filter(o=>o.group==='won').reduce((s,o)=>s+o.value,0);
   const realizadas = gestion + ventas + cancelado + perdida;
 
   document.getElementById('kTotal').textContent     = fmtN(total);
@@ -647,7 +649,6 @@ function renderPipeline() {
   document.getElementById('kNsp').textContent       = fmtN(nsp);
   document.getElementById('kCancelado').textContent = fmtN(cancelado);
   document.getElementById('kPerdida').textContent   = fmtN(perdida);
-  document.getElementById('kIngresos').textContent  = fmtEur(ingresos);
 
   document.getElementById('rConv').textContent  = fmtPct(pct(ventas,total));
   document.getElementById('rShow').textContent  = fmtPct(pct(realizadas,agendas+nsp+realizadas||1));
@@ -686,7 +687,10 @@ function renderPipeline() {
       {label:'Entradas',data:tl.total,backgroundColor:'rgba(59,130,246,.4)',borderColor:CC.pipe,borderWidth:1},
       {label:'Ventas',data:tl.ventas,backgroundColor:'rgba(34,211,106,.5)',borderColor:CC.won,borderWidth:1},
     ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:baseScales()}
+    options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:{
+      x:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9}}},
+      y:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9},stepSize:1,precision:0},min:0}
+    }}
   });
 
   // Donut by stage
@@ -827,13 +831,14 @@ function renderClientesTable() {
       <td style="color:var(--white)">${o.name}<div style="font-size:9px;color:var(--text2)">${o.email}</div></td>
       <td><span class="badge" style="background:${o.color}22;color:${o.color}">${o.stage}</span></td>
       <td class="num">${daysProg}d</td>
-      <td class="num">${o.value>0?fmtEur(o.value):'—'}</td>
       <td class="num">${o.created}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
 }
 
 // ── UTMs Instagram ────────────────────────────────────────────────────────────
+const UTM_SOURCE_LABEL = { disparos: 'Disparos', conversaciones: 'Conversaciones', agendas: 'Agendas' };
+
 function renderUTMs() {
   if (RENDERED.utm) return;
   RENDERED.utm = true;
@@ -843,8 +848,7 @@ function renderUTMs() {
   const convs    = (SH.conversaciones || []).filter(r => utmMatchDate(dateField(r)));
   const agendas  = (SH.agendas        || []).filter(r => utmMatchDate(dateField(r)));
 
-  document.getElementById('utm-filter-count').textContent = fmtN(disparos.length);
-
+  // KPI funnel always shows all 3
   document.getElementById('uDisparos').textContent = fmtN(disparos.length);
   document.getElementById('uConvs').textContent    = fmtN(convs.length);
   document.getElementById('uAgendas').textContent  = fmtN(agendas.length);
@@ -852,9 +856,18 @@ function renderUTMs() {
   document.getElementById('uRateAgenda').textContent= fmtPct(pct(agendas.length,  disparos.length||1));
   document.getElementById('uRateClose').textContent = fmtPct(pct(agendas.length,  convs.length||1));
 
-  // Top campaigns from disparos
+  // Charts use current source
+  const srcData = utmSource === 'disparos' ? disparos : utmSource === 'conversaciones' ? convs : agendas;
+  const srcLabel = UTM_SOURCE_LABEL[utmSource];
+
+  document.getElementById('utm-filter-count').textContent = fmtN(srcData.length);
+  document.getElementById('uCamTitle').textContent = `Top Campañas — ${srcLabel}`;
+  document.getElementById('uColHeader').textContent = srcLabel;
+  document.getElementById('uUsersTitle').textContent = `Top usuarios IG — ${srcLabel}`;
+
+  // Top campaigns
   const byCam = {};
-  disparos.forEach(r=>{
+  srcData.forEach(r=>{
     const c=(r['UTM_Campaign']||r['utm_campaign']||'(sin campaña)').trim();
     byCam[c]=(byCam[c]||0)+1;
   });
@@ -862,13 +875,13 @@ function renderUTMs() {
 
   mkChart('uCamChart',{
     type:'bar',
-    data:{labels:camEntries.map(([k])=>k.length>30?k.slice(0,30)+'…':k),datasets:[{label:'Disparos',data:camEntries.map(([,v])=>v),backgroundColor:'rgba(239,68,68,.45)',borderColor:CC.red,borderWidth:1}]},
+    data:{labels:camEntries.map(([k])=>k.length>30?k.slice(0,30)+'…':k),datasets:[{label:srcLabel,data:camEntries.map(([,v])=>v),backgroundColor:'rgba(239,68,68,.45)',borderColor:CC.red,borderWidth:1}]},
     options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{...baseScales(),y:{grid:{display:false},ticks:{color:CC.tick,font:{size:8}}}}}
   });
 
   // Content type breakdown
   const byContent = {};
-  disparos.forEach(r=>{
+  srcData.forEach(r=>{
     const c=(r['UTM_Content']||r['utm_content']||'(sin tipo)').trim();
     byContent[c]=(byContent[c]||0)+1;
   });
@@ -876,47 +889,50 @@ function renderUTMs() {
   const cColors = ['rgba(239,68,68,.7)','rgba(59,130,246,.7)','rgba(245,158,11,.7)','rgba(34,211,106,.7)','rgba(168,85,247,.7)'];
   mkChart('uContentChart',{
     type:'doughnut',
-    data:{labels:contentEntries.map(([k])=>k),datasets:[{data:contentEntries.map(([,v])=>v),backgroundColor:contentEntries.map((_,i)=>cColors[i%cColors.length]),borderWidth:0,hoverOffset:6}]},
+    data:{labels:contentEntries.map(([k])=>k.length>0?k:'(vacío)'),datasets:[{data:contentEntries.map(([,v])=>v),backgroundColor:contentEntries.map((_,i)=>cColors[i%cColors.length]),borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,plugins:{legend:{position:'right',labels:{color:CC.tick,font:{size:9},boxWidth:10}}},cutout:'60%'}
   });
 
   // Timeline by week
   const byWeek = {};
-  disparos.forEach(r=>{
-    const d=(r['Fecha subscripcion']||r['fecha_subscripcion']||'').slice(0,10);
+  srcData.forEach(r=>{
+    const d=parseSheetDate(r['Fecha subscripcion']||r['fecha_subscripcion']||'');
     if(!d) return;
     const dt=new Date(d), wday=dt.getDay(), diff=dt.getDate()-wday+(wday===0?-6:1);
-    const mon=new Date(dt.setDate(diff)).toISOString().slice(0,10);
+    const mon=new Date(new Date(d).setDate(diff)).toISOString().slice(0,10);
     byWeek[mon]=(byWeek[mon]||0)+1;
   });
   const weekKeys=Object.keys(byWeek).sort();
   mkChart('uTimeChart',{
     type:'line',
-    data:{labels:weekKeys,datasets:[{label:'Disparos/semana',data:weekKeys.map(k=>byWeek[k]),borderColor:CC.red,backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3,pointRadius:3}]},
+    data:{labels:weekKeys,datasets:[{label:`${srcLabel}/semana`,data:weekKeys.map(k=>byWeek[k]),borderColor:CC.red,backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3,pointRadius:3}]},
     options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:baseScales()}
   });
 
   // UTM campaign table
-  renderUtmTable();
+  renderUtmTable(srcData);
 
   // Top IG users (first 20)
-  document.getElementById('igUsersBody').innerHTML = disparos.slice(0,20).map(r=>`
+  document.getElementById('igUsersBody').innerHTML = srcData.slice(0,20).map(r=>`
     <tr>
       <td style="color:var(--white)">@${r['Nombre de IG']||r['nombre_ig']||'—'}</td>
       <td style="color:var(--text2);font-size:10px">${(r['UTM_Campaign']||'—').slice(0,40)}</td>
-      <td class="num">${(r['Fecha subscripcion']||'').slice(0,10)}</td>
+      <td class="num">${parseSheetDate(r['Fecha subscripcion']||r['fecha_subscripcion']||'')}</td>
     </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text2)">Sin datos. Verifica que los Sheets estén publicados como CSV.</td></tr>';
 }
 
-function renderUtmTable() {
+function renderUtmTable(srcData) {
   const q = (document.getElementById('uSearch')?.value||'').toLowerCase();
-  const disparos = SH.disparos || [];
+  const rows_data = srcData || (() => {
+    const dateField = r => r['Fecha subscripcion'] || r['fecha_subscripcion'] || '';
+    return (SH[utmSource] || []).filter(r => utmMatchDate(dateField(r)));
+  })();
   const byCam = {};
-  disparos.forEach(r=>{
+  rows_data.forEach(r=>{
     const c=(r['UTM_Campaign']||r['utm_campaign']||'(sin campaña)').trim();
     byCam[c]=(byCam[c]||0)+1;
   });
-  const total = disparos.length;
+  const total = rows_data.length;
   const rows = Object.entries(byCam)
     .filter(([k])=>!q||k.toLowerCase().includes(q))
     .sort((a,b)=>b[1]-a[1]);
@@ -927,6 +943,13 @@ function renderUtmTable() {
       <td class="num">${v}</td>
       <td class="num" style="color:var(--text2)">${fmtPct(pct(v,total||1))}</td>
     </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
+}
+
+function utmSetSource(src, btn) {
+  utmSource = src;
+  document.querySelectorAll('#utm-filter-bar .pbtn[id^="utm-src"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  RENDERED.utm = false; renderUTMs();
 }
 
 // ── Instagram ─────────────────────────────────────────────────────────────────
@@ -1005,7 +1028,7 @@ function renderIgContent() {
 }
 
 // ── UTM filter state ──────────────────────────────────────────────────────────
-let utmPeriod = 'all', utmDateFrom = '', utmDateTo = '';
+let utmPeriod = 'all', utmDateFrom = '', utmDateTo = '', utmSource = 'disparos';
 
 function parseSheetDate(str) {
   if (!str) return '';
@@ -1135,7 +1158,6 @@ function openModal(o) {
       <div class="mf"><div class="mf-lbl">Vendedor</div><div class="mf-val">${o.closer}</div></div>
       <div class="mf"><div class="mf-lbl">Entrada</div><div class="mf-val">${o.created}</div></div>
       <div class="mf"><div class="mf-lbl">Días en pipeline</div><div class="mf-val">${daysInPipeline}d</div></div>
-      <div class="mf"><div class="mf-lbl">Valor</div><div class="mf-val">${o.value>0?fmtEur(o.value):'—'}</div></div>
     </div>`;
   document.getElementById('modalBg').classList.add('on');
 }
