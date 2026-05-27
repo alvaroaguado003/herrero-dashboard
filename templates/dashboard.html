@@ -683,10 +683,10 @@ function renderPipeline() {
   const tl = buildTimeline(fp, 30);
   const tlMax = Math.max(1, ...tl.total, ...tl.ventas);
   mkChart('tlChart', {
-    type:'bar',
+    type:'line',
     data:{labels:tl.labels,datasets:[
-      {label:'Entradas',data:tl.total,backgroundColor:'rgba(59,130,246,.4)',borderColor:CC.pipe,borderWidth:1},
-      {label:'Ventas',data:tl.ventas,backgroundColor:'rgba(34,211,106,.5)',borderColor:CC.won,borderWidth:1},
+      {label:'Entradas',data:tl.total,borderColor:CC.pipe,backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
+      {label:'Ventas',data:tl.ventas,borderColor:CC.won,backgroundColor:'rgba(34,211,106,.1)',fill:true,tension:.3,pointRadius:3,borderWidth:2},
     ]},
     options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:{
       x:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9}}},
