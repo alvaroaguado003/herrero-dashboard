@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herrero Fitness — Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#EF4444;--black:#080808;--stone:#111;--stone2:#181818;--border:rgba(239,68,68,.14);--text:#909090;--text2:#505050;--white:#F8F8F8}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,.04) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);z-index:0}
+.box{position:relative;z-index:1;width:380px;padding:48px 40px 40px}
+.brand{text-align:center;margin-bottom:44px}
+.brand-logo{width:36px;margin:0 auto 16px;display:block}
+.brand-name{font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;color:var(--white);letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px}
+.brand-tag{font-family:'Inter',sans-serif;font-size:11px;color:var(--red);opacity:.8}
+.form-group{margin-bottom:18px}
+label{display:block;font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+input{width:100%;background:var(--stone2);border:1px solid var(--border);border-radius:4px;color:var(--white);padding:12px 14px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+input:focus{border-color:var(--red)}
+input::placeholder{color:var(--text2)}
+.btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:4px;padding:13px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:8px}
+.btn:hover{opacity:.88}
+.error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:10px 14px;font-size:11px;color:#ef4444;margin-bottom:18px;text-align:center}
+.divider{height:1px;background:var(--border);margin:28px 0}
+.footer-note{text-align:center;font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="box">
+  <div class="brand">
+    <svg class="brand-logo" viewBox="0 0 355.51 577.91" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg1" x1="239.31" y1="95.06" x2="147.37" y2="353.86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#bba257"/><stop offset="1" stop-color="#D4AF37"/></linearGradient>
+        <linearGradient id="lg2" x1="200.45" y1="223.24" x2="52.32" y2="643.8" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#bba257"/><stop offset="1" stop-color="#D4AF37"/></linearGradient>
+      </defs>
+      <path fill="url(#lg1)" d="M335.25,268.33c-34.69,0-67.11-18.61-84.6-48.57l-72.89-124.85-72.89,124.85c-17.49,29.96-49.91,48.57-84.6,48.57H0c14.54-8.7,29.53-20.84,43.02-37.76l.5-.63L177.76,0l30.96,53.02,103.1,176.62.05.07.19.32.47.59c13.49,16.9,28.46,29.02,42.99,37.72h-20.26Z"/>
+      <path fill="#fff" opacity=".8" d="M43.52,347.97l-.5-.63c-13.49-16.92-28.48-29.06-43.02-37.76h20.28c34.69,0,67.11,18.61,84.6,48.57l72.89,124.85,72.89-124.85c17.49-29.96,49.91-48.57,84.6-48.57h20.26c-14.53,8.7-29.5,20.82-42.99,37.72l-.47.59-.19.32-.05.07-103.1,176.62-30.96,53.02L43.52,347.97Z"/>
+      <polygon fill="url(#lg2)" points="128.95 288.63 178.31 204.06 226.56 286.71 177.19 371.28 128.95 288.63"/>
+    </svg>
+    <div class="brand-name">Herrero Fitness</div>
+    <div class="brand-tag">CRM &amp; Analytics</div>
+  </div>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/login">
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" name="username" placeholder="tu_usuario" autocomplete="username" required>
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn">Entrar al Dashboard</button>
+  </form>
+
+  <div class="divider"></div>
+  <div class="footer-note">acceso_restringido · herrero_fitness</div>
+</div>
+</body>
+</html>

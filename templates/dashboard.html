@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herrero Fitness — CRM &amp; Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --red:#EF4444;--red2:rgba(239,68,68,.12);--red3:rgba(239,68,68,.05);--red-dim:#b91c1c;
+  --black:#080808;--stone:#111;--stone2:#181818;--stone3:#202020;
+  --border:rgba(239,68,68,.12);--border2:rgba(255,255,255,.05);
+  --text:#909090;--text2:#505050;--white:#F8F8F8;--pad:56px;--r:6px;
+  --won:#22d36a;--lost:#ef4444;--pipe:#3b82f6;--warn:#f59e0b;--nsp:#a855f7;--gestion:#ea580c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+
+header{background:var(--stone);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--pad);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{width:18px;flex-shrink:0}
+.brand-name{font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;color:var(--white);letter-spacing:.16em;text-transform:uppercase}
+.brand-tag{font-family:'Inter',sans-serif;font-size:9px;color:var(--red);opacity:.8}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.live-pill{display:flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid rgba(34,211,106,.2);border-radius:99px;background:rgba(34,211,106,.04)}
+.live-dot{width:4px;height:4px;border-radius:50%;background:var(--won);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.live-txt{font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--won);font-family:'JetBrains Mono',monospace}
+.user-pill{display:flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--border2);border-radius:99px;font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.user-pill a{color:var(--red);text-decoration:none;margin-left:4px}
+#refreshBtn{padding:4px 10px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--text2);font-size:9px;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:all .2s}
+#refreshBtn:hover{border-color:var(--red);color:var(--red)}
+
+.nav-tabs{display:flex;gap:0;padding:0 var(--pad);background:var(--stone);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:99;overflow-x:auto}
+.nav-tab{padding:10px 18px;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
+.nav-tab.on{color:var(--red);border-bottom-color:var(--red)}
+.nav-tab:hover:not(.on){color:var(--text)}
+.nav-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+.filter-bar{background:var(--stone2);border-bottom:1px solid var(--border);padding:10px var(--pad);display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:84px;z-index:98}
+.pbtn{padding:4px 12px;border-radius:2px;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s;font-family:'JetBrains Mono',monospace}
+.pbtn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.pbtn:hover:not(.on){border-color:var(--red);color:var(--red)}
+.fsep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+.fdate{background:var(--stone);border:1px solid var(--border2);border-radius:3px;color:var(--white);padding:4px 8px;font-size:10px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.fdate:focus{border-color:var(--red)}
+select.fsel{background:var(--stone);border:1px solid var(--border2);border-radius:3px;color:var(--text);padding:4px 8px;font-size:10px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:border-color .2s}
+select.fsel:focus{border-color:var(--red)}
+.fcount{font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--text2);white-space:nowrap}
+.fcount span{color:var(--red)}
+.fclear{padding:3px 8px;border-radius:2px;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(239,68,68,.2);background:transparent;color:rgba(239,68,68,.6);transition:all .15s;font-family:'JetBrains Mono',monospace}
+.fclear:hover{border-color:var(--lost);color:var(--lost)}
+
+.page{display:none;padding:32px var(--pad) 80px;position:relative;z-index:1}
+.page.on{display:block}
+.eyebrow{font-size:8px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.page-h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(20px,2.4vw,32px);color:var(--white);letter-spacing:-.02em;line-height:1.05;margin-bottom:5px}
+.page-h1 em{color:var(--red);font-style:normal}
+.page-sub{font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.sh{font-family:'Montserrat',sans-serif;font-weight:800;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.sh::after{content:'';flex:1;height:1px;background:var(--border)}
+.gap{margin-top:36px}
+
+.kpi-grid{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.g5{grid-template-columns:repeat(5,1fr)}.g6{grid-template-columns:repeat(6,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+.vkpi{background:var(--stone2);padding:18px 16px 14px;position:relative;transition:background .2s}
+.vkpi:hover{background:var(--stone3)}
+.vkpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,#64748b)}
+.vkpi-lbl{font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px;font-family:'JetBrains Mono',monospace;color:var(--c,var(--text2))}
+.vkpi-val{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:var(--white);line-height:.9;letter-spacing:-.03em;margin-bottom:3px}
+.vkpi-val.sm{font-size:26px}
+.vkpi-desc{font-size:9px;color:var(--text2)}
+
+.rates-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.frate{background:var(--stone2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.frate:hover{border-color:var(--red)}
+.frate::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--c,#64748b)}
+.frate-pct{font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;line-height:1;letter-spacing:-.02em;margin-bottom:3px;color:var(--c,var(--white))}
+.frate-title{font-size:10px;font-weight:600;color:var(--white);margin-bottom:1px}
+.frate-sub{font-size:8px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+
+.funnel-v{background:var(--stone2);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:8px}
+.fv-step{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.fv-step:last-child{margin-bottom:0}
+.fv-label{font-size:9px;color:var(--text);width:170px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.fv-track{flex:1;height:20px;background:rgba(255,255,255,.03);border-radius:2px;overflow:hidden}
+.fv-fill{height:100%;border-radius:2px;transition:width .8s ease;display:flex;align-items:center;padding:0 7px;min-width:2px}
+.fv-fill span{font-size:8px;font-weight:700;color:rgba(0,0,0,.8);white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.fv-n{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;color:var(--white);width:32px;text-align:right;flex-shrink:0}
+.fv-pct{font-size:8px;color:var(--text2);width:36px;text-align:right;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+
+.chart-card{background:var(--stone2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.chart-title{font-size:11px;font-weight:700;color:var(--white);margin-bottom:2px;font-family:'Montserrat',sans-serif}
+.chart-sub{font-size:9px;color:var(--text2);margin-bottom:14px;font-family:'JetBrains Mono',monospace}
+
+.step-track{display:flex;align-items:flex-start;gap:0;padding:8px 0 4px}
+.step-node{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;border:2px solid var(--border2);color:var(--text2);background:var(--stone2);position:relative;z-index:1;transition:all .3s}
+.step-circle.active{border-color:var(--c,var(--red));color:var(--c,var(--red));background:color-mix(in srgb,var(--c,var(--red)) 12%,transparent)}
+.step-label{font-size:7px;font-family:'JetBrains Mono',monospace;color:var(--text2);margin-top:6px;text-align:center;max-width:72px;line-height:1.3;letter-spacing:.06em}
+.step-label.active{color:var(--white)}
+.step-line{flex:1;height:1px;background:var(--border2);margin-top:17px;transition:background .3s}
+.step-line.done{background:var(--red)}
+
+.tbl-wrap{background:var(--stone2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tbl-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
+.tbl-search{background:var(--stone);border:1px solid var(--border2);border-radius:3px;color:var(--white);padding:5px 10px;font-size:10px;font-family:'Inter',sans-serif;width:200px;outline:none}
+.tbl-search:focus{border-color:var(--red)}
+.tbl-search::placeholder{color:var(--text2)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{padding:7px 12px;text-align:left;font-size:7px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);background:rgba(239,68,68,.03);border-bottom:1px solid var(--border);white-space:nowrap;font-family:'JetBrains Mono',monospace;cursor:pointer;user-select:none}
+thead th.num{text-align:right}
+thead th:hover{color:var(--white)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--red3)}
+tbody td{padding:8px 12px;color:var(--text)}
+tbody td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--white)}
+.badge{display:inline-block;padding:1px 6px;border-radius:2px;font-size:7px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.tbl-pages{display:flex;justify-content:center;gap:4px;padding:10px}
+.tpbtn{padding:3px 9px;border-radius:2px;font-size:9px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s;font-family:'JetBrains Mono',monospace}
+.tpbtn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.tpbtn:hover:not(.on){border-color:var(--red);color:var(--red)}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mb{margin-bottom:12px}.mb2{margin-bottom:24px}
+
+.btn-sm{padding:6px 12px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .2s;font-family:'Inter',sans-serif}
+.btn-sm.primary{background:var(--red);color:#fff;border-color:var(--red)}
+input.field,select.field{background:var(--stone2);border:1px solid var(--border2);border-radius:3px;color:var(--white);padding:6px 10px;font-size:11px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;width:100%}
+input.field:focus,select.field:focus{border-color:var(--red)}
+.form-inline{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.form-inline .fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+.form-inline label{font-size:7px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-family:'JetBrains Mono',monospace}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--stone2);border:1px solid var(--border);border-radius:6px;padding:12px 18px;font-size:11px;color:var(--white);z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(8px)}
+.modal-bg.on{opacity:1;pointer-events:all}
+.modal{background:var(--stone2);border:1px solid var(--border);border-radius:8px;width:480px;max-width:94vw;max-height:86vh;overflow-y:auto;padding:24px 28px}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.modal-name{font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:var(--white)}
+.modal-x{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--text2);font-size:13px;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-x:hover{border-color:var(--red);color:var(--red)}
+.mf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mf{display:flex;flex-direction:column;gap:2px}
+.mf-lbl{font-size:7px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-family:'JetBrains Mono',monospace}
+.mf-val{font-size:11px;color:var(--white)}
+.modal-div{height:1px;background:var(--border);margin:14px 0}
+
+/* IG filter bar */
+.ig-filter-bar{background:var(--stone2);border-bottom:1px solid var(--border);padding:10px var(--pad);display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:84px;z-index:98;display:none}
+
+@media(max-width:1100px){:root{--pad:20px}.g5,.g6{grid-template-columns:repeat(3,1fr)}.g4,.g3,.rates-grid{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+@media(max-width:600px){.g5,.g6,.g4,.g3,.rates-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg class="brand-logo" viewBox="0 0 355.51 577.91" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lg1" x1="239.31" y1="95.06" x2="147.37" y2="353.86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#bba257"/><stop offset="1" stop-color="#D4AF37"/></linearGradient>
+        <linearGradient id="lg2" x1="200.45" y1="223.24" x2="52.32" y2="643.8" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#bba257"/><stop offset="1" stop-color="#D4AF37"/></linearGradient>
+      </defs>
+      <path fill="url(#lg1)" d="M335.25,268.33c-34.69,0-67.11-18.61-84.6-48.57l-72.89-124.85-72.89,124.85c-17.49,29.96-49.91,48.57-84.6,48.57H0c14.54-8.7,29.53-20.84,43.02-37.76l.5-.63L177.76,0l30.96,53.02,103.1,176.62.05.07.19.32.47.59c13.49,16.9,28.46,29.02,42.99,37.72h-20.26Z"/>
+      <path fill="#fff" opacity=".8" d="M43.52,347.97l-.5-.63c-13.49-16.92-28.48-29.06-43.02-37.76h20.28c34.69,0,67.11,18.61,84.6,48.57l72.89,124.85,72.89-124.85c17.49-29.96,49.91-48.57,84.6-48.57h20.26c-14.53,8.7-29.5,20.82-42.99,37.72l-.47.59-.19.32-.05.07-103.1,176.62-30.96,53.02L43.52,347.97Z"/>
+      <polygon fill="url(#lg2)" points="128.95 288.63 178.31 204.06 226.56 286.71 177.19 371.28 128.95 288.63"/>
+    </svg>
+    <div>
+      <div class="brand-name">Herrero Fitness</div>
+      <div class="brand-tag">CRM &amp; Analytics</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <button id="refreshBtn" onclick="doRefresh()">↻ Actualizar</button>
+    <div class="live-pill"><div class="live-dot"></div><span class="live-txt">GHL Live</span></div>
+    <div class="user-pill">{{ username }}<a href="/logout">salir</a></div>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab on" id="nav-pipeline" onclick="switchPage('pipeline',this)">
+    <div class="nav-dot" style="background:var(--pipe)"></div>Pipeline
+  </button>
+  <button class="nav-tab" id="nav-clientes" onclick="switchPage('clientes',this)">
+    <div class="nav-dot" style="background:var(--won)"></div>Clientes
+  </button>
+  <button class="nav-tab" id="nav-utm" onclick="switchPage('utm',this)">
+    <div class="nav-dot" style="background:var(--red)"></div>UTMs Instagram
+  </button>
+  <button class="nav-tab" id="nav-instagram" onclick="switchPage('instagram',this)">
+    <div class="nav-dot" style="background:#e1306c"></div>Instagram
+  </button>
+  {% if role == 'admin' %}
+  <button class="nav-tab" id="nav-admin" onclick="switchPage('admin',this)">
+    <div class="nav-dot" style="background:var(--warn)"></div>Admin
+  </button>
+  {% endif %}
+</div>
+
+<div class="filter-bar" id="global-filter-bar">
+  <button class="pbtn on" id="pb-all"       onclick="setPeriod('all')">Total</button>
+  <button class="pbtn"    id="pb-today"     onclick="setPeriod('today')">Hoy</button>
+  <button class="pbtn"    id="pb-yesterday" onclick="setPeriod('yesterday')">Ayer</button>
+  <button class="pbtn"    id="pb-week"      onclick="setPeriod('week')">7 días</button>
+  <button class="pbtn"    id="pb-month"     onclick="setPeriod('month')">30 días</button>
+  <div class="fsep"></div>
+  <input class="fdate" type="date" id="dateFrom" onchange="setFilter('dateFrom',this.value)" title="Desde">
+  <span style="color:var(--text2);font-size:11px">→</span>
+  <input class="fdate" type="date" id="dateTo"   onchange="setFilter('dateTo',this.value)"   title="Hasta">
+  <div class="fsep"></div>
+  <select class="fsel pipeline-filter" id="closerFilter" onchange="setFilter('closer',this.value)">
+    <option value="">Vendedor: todos</option>
+  </select>
+  <select class="fsel clientes-filter" id="stageFilter" onchange="setFilter('cStage',this.value)" style="display:none">
+    <option value="">Etapa: todas</option>
+    {% for s in clientes_stages %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+  </select>
+  <div class="fsep"></div>
+  <div class="fcount" id="filterCount"><span id="fcN">—</span> registros</div>
+  <button class="fclear" onclick="clearFilters()">✕ Limpiar</button>
+</div>
+
+<!-- IG filter bar (sticky, shown only on instagram tab) -->
+<div class="filter-bar" id="ig-filter-bar" style="display:none">
+  <button class="pbtn on" id="ig-pb-all"  onclick="igSetPeriod('all',this)">Todo</button>
+  <button class="pbtn"    id="ig-pb-7"    onclick="igSetPeriod(7,this)">7 días</button>
+  <button class="pbtn"    id="ig-pb-30"   onclick="igSetPeriod(30,this)">30 días</button>
+  <button class="pbtn"    id="ig-pb-90"   onclick="igSetPeriod(90,this)">90 días</button>
+  <div class="fsep"></div>
+  <button class="pbtn on" id="ig-t-all"     onclick="igSetType('all',this)">Todos</button>
+  <button class="pbtn"    id="ig-t-video"   onclick="igSetType('VIDEO',this)">Reels</button>
+  <button class="pbtn"    id="ig-t-image"   onclick="igSetType('IMAGE',this)">Fotos</button>
+  <button class="pbtn"    id="ig-t-carousel" onclick="igSetType('CAROUSEL_ALBUM',this)">Carruseles</button>
+  <div class="fsep"></div>
+  <div class="fcount"><span id="ig-filter-count">—</span> posts</div>
+</div>
+
+<!-- ═══ PIPELINE ═══ -->
+<div class="page on" id="page-pipeline">
+  <div class="eyebrow">Sales Pipeline · GHL Real-time</div>
+  <h1 class="page-h1">Pipeline <em>de Ventas</em></h1>
+  <p class="page-sub" id="pSub">Cargando datos desde GHL...</p>
+
+  <div class="sh">Embudo de Conversión</div>
+  <div class="kpi-grid g5 mb">
+    <div class="vkpi" style="--c:#64748b"><div class="vkpi-lbl">Total Pipeline</div><div class="vkpi-val" id="kTotal">—</div><div class="vkpi-desc">Todas las oportunidades</div></div>
+    <div class="vkpi" style="--c:var(--pipe)"><div class="vkpi-lbl">Agendados</div><div class="vkpi-val" id="kAgendas">—</div><div class="vkpi-desc">Llamada Agendada</div></div>
+    <div class="vkpi" style="--c:var(--gestion)"><div class="vkpi-lbl">En Seguimiento</div><div class="vkpi-val" id="kGestion">—</div><div class="vkpi-desc">Seguimiento + con recurso</div></div>
+    <div class="vkpi" style="--c:var(--won)"><div class="vkpi-lbl">Ventas Cerradas</div><div class="vkpi-val" id="kVentas">—</div><div class="vkpi-desc">Venta Cerrada</div></div>
+    <div class="vkpi" style="--c:var(--nsp)"><div class="vkpi-lbl">No Se Presenta</div><div class="vkpi-val" id="kNsp">—</div><div class="vkpi-desc">NSP</div></div>
+  </div>
+  <div class="kpi-grid g3 mb2" style="grid-template-columns:repeat(3,1fr)">
+    <div class="vkpi" style="--c:var(--lost)"><div class="vkpi-lbl">Cancelados</div><div class="vkpi-val" id="kCancelado">—</div><div class="vkpi-desc">Cancelado</div></div>
+    <div class="vkpi" style="--c:#dc2626"><div class="vkpi-lbl">Venta Perdida</div><div class="vkpi-val" id="kPerdida">—</div><div class="vkpi-desc">Cualificaron pero no cerraron</div></div>
+    <div class="vkpi" style="--c:var(--red)"><div class="vkpi-lbl">Ingresos (valor)</div><div class="vkpi-val sm" id="kIngresos">—</div><div class="vkpi-desc">Valor oportunidades ganadas</div></div>
+  </div>
+
+  <div class="rates-grid">
+    <div class="frate" style="--c:var(--won)"><div class="frate-pct" id="rConv">—</div><div class="frate-title">Conv. Global</div><div class="frate-sub">ventas / total</div></div>
+    <div class="frate" style="--c:var(--pipe)"><div class="frate-pct" id="rShow">—</div><div class="frate-title">Show Rate</div><div class="frate-sub">realizadas / agendadas</div></div>
+    <div class="frate" style="--c:var(--gestion)"><div class="frate-pct" id="rCierre">—</div><div class="frate-title">Conv. Llamada</div><div class="frate-sub">ventas / realizadas</div></div>
+    <div class="frate" style="--c:var(--lost)"><div class="frate-pct" id="rLost">—</div><div class="frate-title">% Perdidas</div><div class="frate-sub">perdidas / total</div></div>
+  </div>
+
+  <div class="g2 mb2 gap">
+    <div class="chart-card"><div class="chart-title">Línea temporal</div><div class="chart-sub">oportunidades nuevas · ventas cerradas</div><canvas id="tlChart" height="190"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Distribución por etapa</div><div class="chart-sub">% estado actual del pipeline</div><canvas id="donutChart" height="190"></canvas></div>
+  </div>
+
+  <div class="sh gap">Detalle por Etapa</div>
+  <div class="funnel-v mb2" id="funnelWrap"></div>
+
+  <div class="sh gap">Ranking de Vendedores</div>
+  <div class="tbl-wrap mb2">
+    <table><thead><tr>
+      <th>#</th><th>Vendedor</th>
+      <th class="num">Agendas</th>
+      <th class="num">Realizadas</th>
+      <th class="num">Ventas</th>
+      <th class="num">Conv.%</th>
+    </tr></thead>
+    <tbody id="closerRankBody"></tbody></table>
+  </div>
+
+  <div class="sh gap">Leads en Pipeline</div>
+  <div class="tbl-wrap">
+    <div class="tbl-top">
+      <input class="tbl-search" id="pSearch" placeholder="Buscar nombre o email..." oninput="renderLeadsTable()">
+      <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace" id="pTableCount">—</div>
+    </div>
+    <table><thead><tr><th>Nombre</th><th>Etapa</th><th>Vendedor</th><th class="num">Fecha entrada</th><th class="num">Días en etapa</th></tr></thead>
+    <tbody id="leadsBody"></tbody></table>
+    <div class="tbl-pages" id="leadsPager"></div>
+  </div>
+</div>
+
+<!-- ═══ CLIENTES ═══ -->
+<div class="page" id="page-clientes">
+  <div class="eyebrow">Progreso de Clientes · GHL Real-time</div>
+  <h1 class="page-h1">Clientes <em>Activos</em></h1>
+  <p class="page-sub" id="cSub">Cargando...</p>
+
+  <div class="sh">Distribución por etapa</div>
+  <div class="kpi-grid g4 mb">
+    <div class="vkpi" style="--c:var(--red)"><div class="vkpi-lbl">Total Clientes</div><div class="vkpi-val" id="cTotal">—</div><div class="vkpi-desc">En pipeline</div></div>
+    <div class="vkpi" style="--c:var(--pipe)"><div class="vkpi-lbl">Onboarding</div><div class="vkpi-val" id="cOnboarding">—</div></div>
+    <div class="vkpi" style="--c:var(--warn)"><div class="vkpi-lbl">En Programa</div><div class="vkpi-val" id="cActivos">—</div></div>
+    <div class="vkpi" style="--c:#ef4444"><div class="vkpi-lbl">Offboarding</div><div class="vkpi-val" id="cDone">—</div></div>
+  </div>
+
+  <div class="sh">Recorrido del cliente</div>
+  <div class="chart-card mb2" id="cStepTrack"></div>
+
+  <div class="g2 mb2 gap">
+    <div class="chart-card"><div class="chart-title">Incorporaciones por mes</div><div class="chart-sub">fecha de entrada al pipeline</div><canvas id="cTlChart" height="200"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Distribución actual</div><div class="chart-sub">estado de los clientes filtrados</div><canvas id="cDonutChart" height="200"></canvas></div>
+  </div>
+
+  <div class="sh">Listado de clientes</div>
+  <div class="tbl-wrap">
+    <div class="tbl-top">
+      <input class="tbl-search" id="cSearch" placeholder="Buscar cliente..." oninput="renderClientesTable()">
+      <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace" id="cTableCount">—</div>
+    </div>
+    <table><thead><tr><th>Cliente</th><th>Etapa</th><th class="num">Días programa</th><th class="num">Valor</th><th class="num">Entrada</th></tr></thead>
+    <tbody id="clientesBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ UTMs INSTAGRAM ═══ -->
+<div class="page" id="page-utm">
+  <div class="eyebrow">ManyChat · Instagram UTMs</div>
+  <h1 class="page-h1">UTMs <em>Instagram</em></h1>
+  <p class="page-sub">Funnel de conversión orgánico — desde el disparo en ManyChat hasta la agenda.</p>
+
+  <div class="sh">Embudo Instagram → Agenda</div>
+  <div class="kpi-grid g3 mb2">
+    <div class="vkpi" style="--c:#e1306c"><div class="vkpi-lbl">Disparos (Leads)</div><div class="vkpi-val" id="uDisparos">—</div><div class="vkpi-desc">Entraron al flow de ManyChat</div></div>
+    <div class="vkpi" style="--c:var(--warn)"><div class="vkpi-lbl">Conversaciones</div><div class="vkpi-val" id="uConvs">—</div><div class="vkpi-desc">Tuvieron conversación</div></div>
+    <div class="vkpi" style="--c:var(--won)"><div class="vkpi-lbl">Agendas</div><div class="vkpi-val" id="uAgendas">—</div><div class="vkpi-desc">Agendaron llamada</div></div>
+  </div>
+  <div class="rates-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px">
+    <div class="frate" style="--c:var(--warn)"><div class="frate-pct" id="uRateConv">—</div><div class="frate-title">Disparo → Conv.</div><div class="frate-sub">% conversaciones / disparos</div></div>
+    <div class="frate" style="--c:var(--won)"><div class="frate-pct" id="uRateAgenda">—</div><div class="frate-title">Disparo → Agenda</div><div class="frate-sub">% agendas / disparos</div></div>
+    <div class="frate" style="--c:var(--pipe)"><div class="frate-pct" id="uRateClose">—</div><div class="frate-title">Conv. → Agenda</div><div class="frate-sub">% agendas / conversaciones</div></div>
+  </div>
+
+  <div class="g2 mb2">
+    <div class="chart-card"><div class="chart-title">Top Campañas (Disparos)</div><div class="chart-sub">UTM_Campaign — leads por campaña</div><canvas id="uCamChart" height="220"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Tipo de Contenido</div><div class="chart-sub">UTM_Content — qué formato convierte</div><canvas id="uContentChart" height="220"></canvas></div>
+  </div>
+
+  <div class="sh gap">Timeline de disparos</div>
+  <div class="chart-card mb2"><div class="chart-title">Leads por semana</div><div class="chart-sub">disparos · fecha de suscripción</div><canvas id="uTimeChart" height="130"></canvas></div>
+
+  <div class="sh gap">Top campañas — detalle</div>
+  <div class="tbl-wrap mb2">
+    <div class="tbl-top">
+      <input class="tbl-search" id="uSearch" placeholder="Buscar campaña..." oninput="renderUtmTable()">
+      <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace" id="uTableCount">—</div>
+    </div>
+    <table><thead><tr>
+      <th>Campaña (UTM)</th>
+      <th class="num">Disparos</th>
+      <th class="num">%</th>
+    </tr></thead>
+    <tbody id="utmTableBody"></tbody></table>
+  </div>
+
+  <div class="sh">Top usuarios IG disparados</div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>Usuario IG</th><th>Campaña</th><th class="num">Fecha</th></tr></thead>
+    <tbody id="igUsersBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ INSTAGRAM ═══ -->
+<div class="page" id="page-instagram">
+  <div class="eyebrow">Instagram · Graph API</div>
+  <h1 class="page-h1">Instagram <em>Analytics</em></h1>
+  <p class="page-sub">Análisis de rendimiento de la cuenta de Instagram.</p>
+
+  {% if not ig_configured %}
+  <div style="text-align:center;padding:60px 20px;border:1px dashed rgba(239,68,68,.2);border-radius:8px;background:rgba(239,68,68,.02)">
+    <div style="font-size:32px;margin-bottom:16px">📸</div>
+    <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:var(--white);margin-bottom:8px">Instagram no configurado</div>
+    <div style="font-size:11px;color:var(--text2);max-width:400px;margin:0 auto;line-height:1.7">
+      Añade <code style="background:var(--stone2);padding:2px 6px;border-radius:3px;color:var(--red)">IG_TOKEN</code> e
+      <code style="background:var(--stone2);padding:2px 6px;border-radius:3px;color:var(--red)">IG_ACCOUNT_ID</code>
+      en el archivo <code style="background:var(--stone2);padding:2px 6px;border-radius:3px;color:var(--text)">.env</code>
+      para activar las métricas de Instagram.
+    </div>
+  </div>
+  {% else %}
+  <div id="ig-loading" style="text-align:center;padding:60px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:11px">Cargando datos...</div>
+  <div id="ig-error" style="display:none;text-align:center;padding:40px;color:#ef4444"></div>
+  <div id="ig-content" style="display:none">
+    <div class="kpi-grid g6 mb2">
+      <div class="vkpi" style="--c:#e1306c"><div class="vkpi-lbl">Seguidores</div><div class="vkpi-val" id="ig-followers">—</div></div>
+      <div class="vkpi" style="--c:var(--red)"><div class="vkpi-lbl">Eng. Rate</div><div class="vkpi-val sm" id="ig-engrate">—</div></div>
+      <div class="vkpi" style="--c:#e1306c"><div class="vkpi-lbl">Avg Likes</div><div class="vkpi-val" id="ig-avg-likes">—</div></div>
+      <div class="vkpi" style="--c:var(--pipe)"><div class="vkpi-lbl">Avg Comentarios</div><div class="vkpi-val" id="ig-avg-comments">—</div></div>
+      <div class="vkpi" style="--c:var(--warn)"><div class="vkpi-lbl">Avg Views</div><div class="vkpi-val" id="ig-avg-views">—</div></div>
+      <div class="vkpi" style="--c:var(--text)"><div class="vkpi-lbl">Posts filtrados</div><div class="vkpi-val" id="ig-media-count">—</div></div>
+    </div>
+    <div class="g2 gap mb2">
+      <div class="chart-card"><div class="chart-title">Likes por post</div><canvas id="ig-chart-likes" height="110"></canvas></div>
+      <div class="chart-card"><div class="chart-title">Views por Reel</div><canvas id="ig-chart-views" height="110"></canvas></div>
+    </div>
+    <div class="sh">Top posts del periodo</div>
+    <div id="ig-top3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px"></div>
+    <div class="sh">Todos los posts</div>
+    <div id="ig-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px"></div>
+  </div>
+  {% endif %}
+</div>
+
+{% if role == 'admin' %}
+<!-- ═══ ADMIN ═══ -->
+<div class="page" id="page-admin">
+  <div class="eyebrow">Administración</div>
+  <h1 class="page-h1">Gestión de <em>Usuarios</em></h1>
+  <p class="page-sub">Crea y elimina accesos. Solo visible para administradores.</p>
+  <div class="sh">Crear usuario</div>
+  <div class="chart-card mb2">
+    <div class="form-inline">
+      <div class="fg"><label>Usuario</label><input class="field" id="nu" placeholder="nombre"></div>
+      <div class="fg"><label>Email</label><input class="field" id="ne" placeholder="email@..."></div>
+      <div class="fg"><label>Contraseña</label><input class="field" type="password" id="np" placeholder="••••••••"></div>
+      <div class="fg" style="max-width:120px"><label>Rol</label><select id="nr" class="field"><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+      <div class="fg" style="max-width:80px"><label>&nbsp;</label><button class="btn-sm primary" onclick="createUser()">Crear</button></div>
+    </div>
+  </div>
+  <div class="sh">Usuarios</div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Creado</th><th class="num">Acción</th></tr></thead>
+    <tbody id="usersBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text2)">Cargando...</td></tr></tbody></table>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- ═══ DATA + LOGIC ═══ -->
+<script>
+const P  = {{ pipeline_json  | tojson }};
+const C  = {{ clientes_json  | tojson }};
+const SH = {{ sheets_json    | tojson }};
+
+const STAGE_META = {};
+{% for s in stages_meta %}
+STAGE_META['{{ s.id }}'] = { name: '{{ s.name }}', group: '{{ s.group }}', color: '{{ s.color }}' };
+{% endfor %}
+
+const CLIENTES_META = {};
+{% for s in clientes_stages %}
+CLIENTES_META['{{ s.id }}'] = { name: '{{ s.name }}', color: '{{ s.color }}', group: '{{ s.group }}', pos: {{ loop.index0 }} };
+{% endfor %}
+
+const STAGE_ORDER_FUNNEL = [
+  'd6a4d9d2-a2a4-4b41-8a30-b3dc1058adb7',
+  '6197e41a-c477-4177-8900-d639bae53181',
+  'fd7b5783-7c9a-445c-9afa-c25769001ef2',
+  '2381edeb-835b-43b6-a902-e199b2e65afc',
+  '1e5ff1fc-0f72-4100-a842-c2b5f52e37d3',
+  'b9be8d54-6f74-4ccd-b773-f76317705240',
+  '9d75f1e3-c539-4751-bc20-34a49f2bb190'
+];
+
+let FS = { period:'all', dateFrom:'', dateTo:'', closer:'', cStage:'' };
+let currentPage = 'pipeline';
+let leadsPage   = 0;
+let CHARTS      = {};
+
+const today   = () => new Date().toISOString().slice(0,10);
+const daysAgo = n  => new Date(Date.now()-n*864e5).toISOString().slice(0,10);
+const pct     = (n,d) => d ? +((n/d)*100).toFixed(1) : 0;
+const fmtPct  = v => v + '%';
+const fmtN    = n => n.toLocaleString('es-ES');
+const fmtEur  = v => v >= 1000 ? (v/1000).toFixed(1)+'k €' : v + ' €';
+
+function matchDate(d) {
+  if (!d) return true;
+  const t=today(), y=daysAgo(1), w=daysAgo(7), m=daysAgo(30);
+  switch(FS.period){
+    case 'today':     return d===t;
+    case 'yesterday': return d===y;
+    case 'week':      return d>=w && d<=t;
+    case 'month':     return d>=m && d<=t;
+    case 'custom':    return (!FS.dateFrom||d>=FS.dateFrom)&&(!FS.dateTo||d<=FS.dateTo);
+    default:          return true;
+  }
+}
+
+function filteredP() {
+  return P.filter(o =>
+    matchDate(o.created) &&
+    (!FS.closer || o.closer === FS.closer)
+  );
+}
+
+function filteredC() {
+  return C.filter(o =>
+    matchDate(o.created) &&
+    (!FS.cStage || o.stage_id === FS.cStage)
+  );
+}
+
+function buildTimeline(opps, days) {
+  const labels=[], total={}, ventas={};
+  for(let i=days-1;i>=0;i--){
+    const d=daysAgo(i), lbl=d.slice(5);
+    labels.push(lbl); total[d]=0; ventas[d]=0;
+  }
+  opps.forEach(o=>{
+    if(total[o.created]!==undefined) total[o.created]++;
+    if(o.group==='won'&&ventas[o.stage_changed]!==undefined) ventas[o.stage_changed]++;
+  });
+  const keys=Object.keys(total).sort();
+  return { labels, total:keys.map(k=>total[k]), ventas:keys.map(k=>ventas[k]) };
+}
+
+function buildMonthly(opps) {
+  const m={};
+  opps.forEach(o=>{ const mo=o.created.slice(0,7); m[mo]=(m[mo]||0)+1; });
+  const keys=Object.keys(m).sort();
+  return { labels:keys, counts:keys.map(k=>m[k]) };
+}
+
+function mkChart(id, cfg) {
+  if (CHARTS[id]) { CHARTS[id].destroy(); }
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  CHARTS[id] = new Chart(ctx, cfg);
+}
+
+const CC = {
+  red:   '#EF4444', pipe:'#3b82f6', won:'#22d36a', warn:'#f59e0b',
+  nsp:   '#a855f7', lost:'#ef4444', gestion:'#ea580c', ig:'#e1306c',
+  grid:  'rgba(255,255,255,.04)', tick: '#505050'
+};
+
+function baseScales(yLabel='') {
+  return {
+    x:{ grid:{color:CC.grid}, ticks:{color:CC.tick,font:{size:9}} },
+    y:{ grid:{color:CC.grid}, ticks:{color:CC.tick,font:{size:9}}, title:{display:!!yLabel,text:yLabel,color:CC.tick,font:{size:9}} }
+  };
+}
+
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+let RENDERED = {};
+
+function renderPipeline() {
+  if (RENDERED.pipeline) return;
+  RENDERED.pipeline = true;
+
+  const fp = filteredP();
+  const total    = fp.length;
+  const agendas  = fp.filter(o=>o.group==='agenda').length;
+  const gestion  = fp.filter(o=>o.group==='gestion').length;
+  const ventas   = fp.filter(o=>o.group==='won').length;
+  const nsp      = fp.filter(o=>o.group==='nsp').length;
+  const cancelado= fp.filter(o=>o.group==='lost'&&o.stage==='Cancelado').length;
+  const perdida  = fp.filter(o=>o.group==='lost'&&o.stage==='Venta Perdida').length;
+  const ingresos = fp.filter(o=>o.group==='won').reduce((s,o)=>s+o.value,0);
+  const realizadas = gestion + ventas + cancelado + perdida;
+
+  document.getElementById('kTotal').textContent     = fmtN(total);
+  document.getElementById('kAgendas').textContent   = fmtN(agendas);
+  document.getElementById('kGestion').textContent   = fmtN(gestion);
+  document.getElementById('kVentas').textContent    = fmtN(ventas);
+  document.getElementById('kNsp').textContent       = fmtN(nsp);
+  document.getElementById('kCancelado').textContent = fmtN(cancelado);
+  document.getElementById('kPerdida').textContent   = fmtN(perdida);
+  document.getElementById('kIngresos').textContent  = fmtEur(ingresos);
+
+  document.getElementById('rConv').textContent  = fmtPct(pct(ventas,total));
+  document.getElementById('rShow').textContent  = fmtPct(pct(realizadas,agendas+nsp+realizadas||1));
+  document.getElementById('rCierre').textContent= fmtPct(pct(ventas,realizadas||1));
+  document.getElementById('rLost').textContent  = fmtPct(pct(cancelado+perdida,total||1));
+
+  document.getElementById('pSub').textContent =
+    `${fmtN(total)} oportunidades · ${fmtN(ventas)} cerradas · ${fmtPct(pct(ventas,total||1))} conversión`;
+
+  // Populate closer filter
+  const closers = [...new Set(fp.map(o=>o.closer).filter(c=>c&&c!=='—'))].sort();
+  const cf = document.getElementById('closerFilter');
+  while (cf.options.length > 1) cf.remove(1);
+  closers.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; cf.append(o); });
+
+  document.getElementById('fcN').textContent = fmtN(total);
+
+  // Timeline chart (30 days)
+  const tl = buildTimeline(fp, 30);
+  mkChart('tlChart', {
+    type:'bar',
+    data:{labels:tl.labels,datasets:[
+      {label:'Entradas',data:tl.total,backgroundColor:'rgba(59,130,246,.4)',borderColor:CC.pipe,borderWidth:1},
+      {label:'Ventas',data:tl.ventas,backgroundColor:'rgba(34,211,106,.5)',borderColor:CC.won,borderWidth:1},
+    ]},
+    options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:baseScales()}
+  });
+
+  // Donut by stage
+  const stageCounts = {};
+  fp.forEach(o=>{ stageCounts[o.stage]=(stageCounts[o.stage]||0)+1; });
+  const slabels=Object.keys(stageCounts), svals=slabels.map(k=>stageCounts[k]);
+  const stageColors = {'Llamada Agendada':CC.pipe,'No Se Presenta':CC.nsp,'Seguimiento':CC.warn,'Seguimiento con Recurso':CC.gestion,'Cancelado':'#374151','Venta Cerrada':CC.won,'Venta Perdida':'#dc2626'};
+  mkChart('donutChart', {
+    type:'doughnut',
+    data:{labels:slabels,datasets:[{data:svals,backgroundColor:slabels.map(l=>stageColors[l]||'#64748b'),borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{color:CC.tick,font:{size:9},boxWidth:10}}},cutout:'65%'}
+  });
+
+  // Funnel bars
+  const funnelEl = document.getElementById('funnelWrap');
+  funnelEl.innerHTML = '';
+  const maxN = Math.max(...Object.values(stageCounts), 1);
+  STAGE_ORDER_FUNNEL.forEach(sid => {
+    const meta = STAGE_META[sid]; if (!meta) return;
+    const n = stageCounts[meta.name] || 0;
+    funnelEl.innerHTML += `
+      <div class="fv-step">
+        <div class="fv-label">${meta.name}</div>
+        <div class="fv-track"><div class="fv-fill" style="width:${Math.max(2,(n/maxN)*100)}%;background:${meta.color}"><span>${n>0?fmtN(n):''}</span></div></div>
+        <div class="fv-n">${fmtN(n)}</div>
+        <div class="fv-pct">${fmtPct(pct(n,total||1))}</div>
+      </div>`;
+  });
+
+  // Closer ranking
+  const byCloser = {};
+  fp.filter(o=>o.group!=='').forEach(o=>{
+    const k = o.closer || '—';
+    if(!byCloser[k]) byCloser[k]={agendas:0,realizadas:0,ventas:0};
+    if(o.group==='agenda') byCloser[k].agendas++;
+    if(['gestion','won','lost'].includes(o.group)) byCloser[k].realizadas++;
+    if(o.group==='won') byCloser[k].ventas++;
+  });
+  const rankRows = Object.entries(byCloser).sort((a,b)=>b[1].ventas-a[1].ventas);
+  document.getElementById('closerRankBody').innerHTML = rankRows.map(([name,d],i)=>`
+    <tr>
+      <td style="color:var(--red);font-weight:700">${i+1}</td>
+      <td style="color:var(--white);font-weight:600">${name}</td>
+      <td class="num">${d.agendas}</td>
+      <td class="num">${d.realizadas}</td>
+      <td class="num" style="color:var(--won)">${d.ventas}</td>
+      <td class="num">${fmtPct(pct(d.ventas,d.realizadas||1))}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
+
+  renderLeadsTable();
+}
+
+let leadsData = [];
+function renderLeadsTable() {
+  const q = (document.getElementById('pSearch')?.value||'').toLowerCase();
+  const fp = filteredP();
+  leadsData = fp.filter(o => !q || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q));
+  const perPage=20, total=leadsData.length, pages=Math.ceil(total/perPage)||1;
+  if(leadsPage>=pages) leadsPage=0;
+  document.getElementById('pTableCount').textContent = `${fmtN(total)} registros`;
+  const slice = leadsData.slice(leadsPage*perPage,(leadsPage+1)*perPage);
+  const today_ = today();
+  document.getElementById('leadsBody').innerHTML = slice.map(o=>{
+    const daysInStage = Math.floor((Date.now()-new Date(o.stage_changed).getTime())/864e5);
+    return `<tr onclick="openModal(${JSON.stringify(o).replace(/"/g,'&quot;')})">
+      <td style="color:var(--white)">${o.name}</td>
+      <td><span class="badge" style="background:${o.color}22;color:${o.color}">${o.stage}</span></td>
+      <td>${o.closer}</td>
+      <td class="num">${o.created}</td>
+      <td class="num" style="color:${daysInStage>7?'var(--warn)':'var(--text2)'}">${daysInStage}d</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text2)">Sin resultados</td></tr>';
+
+  // Pager
+  const pager = document.getElementById('leadsPager');
+  pager.innerHTML = '';
+  if(pages>1) for(let i=0;i<pages;i++){
+    const b=document.createElement('button');
+    b.className='tpbtn'+(i===leadsPage?' on':'');
+    b.textContent=i+1;
+    b.onclick=()=>{leadsPage=i;renderLeadsTable();};
+    pager.append(b);
+  }
+}
+
+// ── Clientes ──────────────────────────────────────────────────────────────────
+function renderClientes() {
+  if (RENDERED.clientes) return;
+  RENDERED.clientes = true;
+
+  const fc = filteredC();
+  const total     = fc.length;
+  const onboarding= fc.filter(o=>o.stage==='Onboarding').length;
+  const activos   = fc.filter(o=>o.stage==='En Programa').length;
+  const done      = fc.filter(o=>o.stage==='Offboarding').length;
+
+  document.getElementById('cTotal').textContent     = fmtN(total);
+  document.getElementById('cOnboarding').textContent= fmtN(onboarding);
+  document.getElementById('cActivos').textContent   = fmtN(activos);
+  document.getElementById('cDone').textContent      = fmtN(done);
+  document.getElementById('cSub').textContent       = `${fmtN(total)} clientes en el programa`;
+
+  // Step track
+  const steps = Object.values(CLIENTES_META).sort((a,b)=>a.pos-b.pos);
+  const stepsEl = document.getElementById('cStepTrack');
+  let html = '<div class="step-track">';
+  steps.forEach((s,i)=>{
+    const n = fc.filter(o=>CLIENTES_META[o.stage_id]?.pos===s.pos).length;
+    html += `<div class="step-node">
+      <div class="step-circle active" style="--c:${s.color}">${n}</div>
+      <div class="step-label active">${s.name}</div>
+    </div>`;
+    if(i<steps.length-1) html += `<div class="step-line done"></div>`;
+  });
+  html += '</div>';
+  stepsEl.innerHTML = html;
+
+  // Monthly chart
+  const mo = buildMonthly(fc);
+  mkChart('cTlChart',{type:'bar',data:{labels:mo.labels,datasets:[{label:'Incorporaciones',data:mo.counts,backgroundColor:'rgba(239,68,68,.35)',borderColor:CC.red,borderWidth:1}]},options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:baseScales()}});
+
+  // Donut
+  const counts = {onboarding,activos,done};
+  mkChart('cDonutChart',{type:'doughnut',data:{labels:['Onboarding','En Programa','Offboarding'],datasets:[{data:[onboarding,activos,done],backgroundColor:[CC.pipe,CC.warn,'#ef4444'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:CC.tick,font:{size:9},boxWidth:10}}},cutout:'65%'}});
+
+  renderClientesTable();
+}
+
+function renderClientesTable() {
+  const q = (document.getElementById('cSearch')?.value||'').toLowerCase();
+  const fc = filteredC();
+  const data = fc.filter(o => !q || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q));
+  document.getElementById('cTableCount').textContent = `${fmtN(data.length)} clientes`;
+  const today_ = today();
+  document.getElementById('clientesBody').innerHTML = data.slice(0,50).map(o=>{
+    const daysProg = Math.floor((Date.now()-new Date(o.created).getTime())/864e5);
+    return `<tr>
+      <td style="color:var(--white)">${o.name}<div style="font-size:9px;color:var(--text2)">${o.email}</div></td>
+      <td><span class="badge" style="background:${o.color}22;color:${o.color}">${o.stage}</span></td>
+      <td class="num">${daysProg}d</td>
+      <td class="num">${o.value>0?fmtEur(o.value):'—'}</td>
+      <td class="num">${o.created}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
+}
+
+// ── UTMs Instagram ────────────────────────────────────────────────────────────
+function renderUTMs() {
+  if (RENDERED.utm) return;
+  RENDERED.utm = true;
+
+  const disparos = SH.disparos || [];
+  const convs    = SH.conversaciones || [];
+  const agendas  = SH.agendas || [];
+
+  document.getElementById('uDisparos').textContent = fmtN(disparos.length);
+  document.getElementById('uConvs').textContent    = fmtN(convs.length);
+  document.getElementById('uAgendas').textContent  = fmtN(agendas.length);
+  document.getElementById('uRateConv').textContent  = fmtPct(pct(convs.length,   disparos.length||1));
+  document.getElementById('uRateAgenda').textContent= fmtPct(pct(agendas.length,  disparos.length||1));
+  document.getElementById('uRateClose').textContent = fmtPct(pct(agendas.length,  convs.length||1));
+
+  // Top campaigns from disparos
+  const byCam = {};
+  disparos.forEach(r=>{
+    const c=(r['UTM_Campaign']||r['utm_campaign']||'(sin campaña)').trim();
+    byCam[c]=(byCam[c]||0)+1;
+  });
+  const camEntries = Object.entries(byCam).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  mkChart('uCamChart',{
+    type:'bar',
+    data:{labels:camEntries.map(([k])=>k.length>30?k.slice(0,30)+'…':k),datasets:[{label:'Disparos',data:camEntries.map(([,v])=>v),backgroundColor:'rgba(239,68,68,.45)',borderColor:CC.red,borderWidth:1}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{...baseScales(),y:{grid:{display:false},ticks:{color:CC.tick,font:{size:8}}}}}
+  });
+
+  // Content type breakdown
+  const byContent = {};
+  disparos.forEach(r=>{
+    const c=(r['UTM_Content']||r['utm_content']||'(sin tipo)').trim();
+    byContent[c]=(byContent[c]||0)+1;
+  });
+  const contentEntries = Object.entries(byContent).sort((a,b)=>b[1]-a[1]);
+  const cColors = ['rgba(239,68,68,.7)','rgba(59,130,246,.7)','rgba(245,158,11,.7)','rgba(34,211,106,.7)','rgba(168,85,247,.7)'];
+  mkChart('uContentChart',{
+    type:'doughnut',
+    data:{labels:contentEntries.map(([k])=>k),datasets:[{data:contentEntries.map(([,v])=>v),backgroundColor:contentEntries.map((_,i)=>cColors[i%cColors.length]),borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{color:CC.tick,font:{size:9},boxWidth:10}}},cutout:'60%'}
+  });
+
+  // Timeline by week
+  const byWeek = {};
+  disparos.forEach(r=>{
+    const d=(r['Fecha subscripcion']||r['fecha_subscripcion']||'').slice(0,10);
+    if(!d) return;
+    const dt=new Date(d), wday=dt.getDay(), diff=dt.getDate()-wday+(wday===0?-6:1);
+    const mon=new Date(dt.setDate(diff)).toISOString().slice(0,10);
+    byWeek[mon]=(byWeek[mon]||0)+1;
+  });
+  const weekKeys=Object.keys(byWeek).sort();
+  mkChart('uTimeChart',{
+    type:'line',
+    data:{labels:weekKeys,datasets:[{label:'Disparos/semana',data:weekKeys.map(k=>byWeek[k]),borderColor:CC.red,backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3,pointRadius:3}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:baseScales()}
+  });
+
+  // UTM campaign table
+  renderUtmTable();
+
+  // Top IG users (first 20)
+  document.getElementById('igUsersBody').innerHTML = disparos.slice(0,20).map(r=>`
+    <tr>
+      <td style="color:var(--white)">@${r['Nombre de IG']||r['nombre_ig']||'—'}</td>
+      <td style="color:var(--text2);font-size:10px">${(r['UTM_Campaign']||'—').slice(0,40)}</td>
+      <td class="num">${(r['Fecha subscripcion']||'').slice(0,10)}</td>
+    </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text2)">Sin datos. Verifica que los Sheets estén publicados como CSV.</td></tr>';
+}
+
+function renderUtmTable() {
+  const q = (document.getElementById('uSearch')?.value||'').toLowerCase();
+  const disparos = SH.disparos || [];
+  const byCam = {};
+  disparos.forEach(r=>{
+    const c=(r['UTM_Campaign']||r['utm_campaign']||'(sin campaña)').trim();
+    byCam[c]=(byCam[c]||0)+1;
+  });
+  const total = disparos.length;
+  const rows = Object.entries(byCam)
+    .filter(([k])=>!q||k.toLowerCase().includes(q))
+    .sort((a,b)=>b[1]-a[1]);
+  document.getElementById('uTableCount').textContent = `${rows.length} campañas`;
+  document.getElementById('utmTableBody').innerHTML = rows.map(([k,v])=>`
+    <tr>
+      <td style="color:var(--white)">${k}</td>
+      <td class="num">${v}</td>
+      <td class="num" style="color:var(--text2)">${fmtPct(pct(v,total||1))}</td>
+    </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text2)">Sin datos</td></tr>';
+}
+
+// ── Instagram ─────────────────────────────────────────────────────────────────
+let igData = null, igPeriod = 'all', igType = 'all';
+
+function renderInstagram() {
+  if (igData) { renderIgContent(); return; }
+  const igConfigured = {{ 'true' if ig_configured else 'false' }};
+  if (!igConfigured) return;
+  fetch('/api/instagram').then(r=>r.json()).then(d=>{
+    if(d.error){ document.getElementById('ig-error').textContent='Error: '+d.error; document.getElementById('ig-error').style.display='block'; document.getElementById('ig-loading').style.display='none'; return; }
+    igData=d; document.getElementById('ig-loading').style.display='none'; document.getElementById('ig-content').style.display='block';
+    renderIgContent();
+  }).catch(e=>{ document.getElementById('ig-loading').style.display='none'; document.getElementById('ig-error').textContent='Error de conexión'; document.getElementById('ig-error').style.display='block'; });
+}
+
+function igFilter(media) {
+  let f = igPeriod==='all' ? media : media.filter(m=>{
+    const d=m.timestamp.slice(0,10); return d>=daysAgo(igPeriod)&&d<=today();
+  });
+  if(igType!=='all') f=f.filter(m=>m.media_type===igType);
+  return f;
+}
+
+function renderIgContent() {
+  if(!igData) return;
+  const media = igFilter(igData.media||[]);
+  const p = igData.profile||{};
+  const followers = p.followers_count||0;
+  const totalLikes = media.reduce((s,m)=>s+(m.like_count||0),0);
+  const totalComments = media.reduce((s,m)=>s+(m.comments_count||0),0);
+  const totalViews = media.filter(m=>m.media_type==='VIDEO').reduce((s,m)=>s+(m.video_views||0),0);
+  const reelsCount = media.filter(m=>m.media_type==='VIDEO').length;
+  const engRate = followers>0?((totalLikes+totalComments)/media.length/followers*100).toFixed(2)+'%':'—';
+
+  document.getElementById('ig-followers').textContent = fmtN(followers);
+  document.getElementById('ig-engrate').textContent   = engRate;
+  document.getElementById('ig-avg-likes').textContent  = media.length ? fmtN(Math.round(totalLikes/media.length)) : '—';
+  document.getElementById('ig-avg-comments').textContent= media.length ? fmtN(Math.round(totalComments/media.length)) : '—';
+  document.getElementById('ig-avg-views').textContent  = reelsCount ? fmtN(Math.round(totalViews/reelsCount)) : '—';
+  document.getElementById('ig-media-count').textContent= fmtN(media.length);
+  document.getElementById('ig-filter-count').textContent= fmtN(media.length);
+
+  const sorted=[...media].sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+  const lks=sorted.map(m=>m.like_count||0), vws=sorted.filter(m=>m.media_type==='VIDEO'), lbls=sorted.map(m=>m.timestamp.slice(5,10));
+
+  mkChart('ig-chart-likes',{type:'bar',data:{labels:lbls,datasets:[{label:'Likes',data:lks,backgroundColor:'rgba(225,48,108,.4)',borderColor:'#e1306c',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false}},scales:baseScales()}});
+  mkChart('ig-chart-views',{type:'bar',data:{labels:vws.map(m=>m.timestamp.slice(5,10)),datasets:[{label:'Views',data:vws.map(m=>m.video_views||0),backgroundColor:'rgba(239,68,68,.4)',borderColor:CC.red,borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false}},scales:baseScales()}});
+
+  const top3=[...media].sort((a,b)=>((b.like_count||0)+(b.comments_count||0))-((a.like_count||0)+(a.comments_count||0))).slice(0,3);
+  document.getElementById('ig-top3').innerHTML=top3.map(m=>`
+    <a href="${m.permalink}" target="_blank" style="text-decoration:none">
+      <div class="chart-card" style="padding:12px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor=''">
+        <div style="aspect-ratio:1;background:var(--stone);border-radius:4px;overflow:hidden;margin-bottom:8px;display:flex;align-items:center;justify-content:center">
+          ${m.media_url||m.thumbnail_url?`<img src="${m.thumbnail_url||m.media_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:'<div style="font-size:24px">🎬</div>'}
+        </div>
+        <div style="display:flex;gap:12px;font-size:10px;color:var(--text2);font-family:JetBrains Mono,monospace">
+          <span style="color:#e1306c">♥ ${fmtN(m.like_count||0)}</span>
+          <span>💬 ${fmtN(m.comments_count||0)}</span>
+          ${m.video_views?`<span>▶ ${fmtN(m.video_views)}</span>`:''}
+        </div>
+      </div>
+    </a>`).join('');
+
+  document.getElementById('ig-grid').innerHTML=media.map(m=>`
+    <a href="${m.permalink}" target="_blank" style="text-decoration:none">
+      <div class="chart-card" style="padding:8px;cursor:pointer" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor=''">
+        <div style="aspect-ratio:1;background:var(--stone);border-radius:3px;overflow:hidden;margin-bottom:6px">
+          ${m.media_url||m.thumbnail_url?`<img src="${m.thumbnail_url||m.media_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy">`:'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:20px">🎬</div>'}
+        </div>
+        <div style="font-size:9px;color:var(--text2);font-family:JetBrains Mono,monospace;display:flex;gap:8px">
+          <span>♥${fmtN(m.like_count||0)}</span><span>💬${fmtN(m.comments_count||0)}</span>
+        </div>
+      </div>
+    </a>`).join('');
+}
+
+function igSetPeriod(p,btn){
+  igPeriod=p;
+  document.querySelectorAll('#ig-filter-bar .pbtn[id^="ig-pb"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(igData) renderIgContent();
+}
+function igSetType(t,btn){
+  igType=t;
+  document.querySelectorAll('#ig-filter-bar .pbtn[id^="ig-t"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(igData) renderIgContent();
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function switchPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  btn.classList.add('on');
+  currentPage = name;
+
+  const gf = document.getElementById('global-filter-bar');
+  const igf = document.getElementById('ig-filter-bar');
+  const cf = document.querySelector('.closer-filter');
+
+  document.querySelectorAll('.pipeline-filter').forEach(el=>el.style.display=name==='pipeline'?'':'none');
+  document.querySelectorAll('.clientes-filter').forEach(el=>el.style.display=name==='clientes'?'':'none');
+  gf.style.display = ['pipeline','clientes'].includes(name) ? 'flex' : 'none';
+  igf.style.display = name==='instagram' ? 'flex' : 'none';
+
+  RENDERED = {};
+  if(name==='pipeline')   renderPipeline();
+  if(name==='clientes')   renderClientes();
+  if(name==='utm')        renderUTMs();
+  if(name==='instagram')  renderInstagram();
+  if(name==='admin')      loadUsers();
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+function setPeriod(p) {
+  FS.period = p; if(p!=='custom'){FS.dateFrom='';FS.dateTo='';}
+  document.querySelectorAll('#global-filter-bar .pbtn[id^="pb"]').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('pb-'+p); if(el) el.classList.add('on');
+  else{document.getElementById('pb-all').classList.remove('on');}
+  RENDERED={}; rerender();
+}
+function setFilter(k,v) {
+  FS[k]=v;
+  if(k==='dateFrom'||k==='dateTo'){FS.period='custom';document.querySelectorAll('#global-filter-bar .pbtn[id^="pb"]').forEach(b=>b.classList.remove('on'));}
+  RENDERED={}; rerender();
+}
+function clearFilters() {
+  FS={period:'all',dateFrom:'',dateTo:'',closer:'',cStage:''};
+  document.getElementById('dateFrom').value='';document.getElementById('dateTo').value='';
+  document.getElementById('closerFilter').value='';document.getElementById('stageFilter').value='';
+  document.querySelectorAll('#global-filter-bar .pbtn[id^="pb"]').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pb-all').classList.add('on');
+  RENDERED={}; rerender();
+}
+function rerender() {
+  if(currentPage==='pipeline') renderPipeline();
+  if(currentPage==='clientes') renderClientes();
+}
+
+// ── Refresh ───────────────────────────────────────────────────────────────────
+function doRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.textContent='↻ Actualizando...'; btn.disabled=true;
+  fetch('/api/refresh').then(()=>{ location.reload(); });
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(o) {
+  const daysInPipeline = Math.floor((Date.now()-new Date(o.created).getTime())/864e5);
+  document.getElementById('modalBox').innerHTML = `
+    <div class="modal-hdr">
+      <div class="modal-name">${o.name}</div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <span class="badge" style="background:${o.color}22;color:${o.color};margin-bottom:14px">${o.stage}</span>
+    <div class="modal-div"></div>
+    <div class="mf-grid">
+      <div class="mf"><div class="mf-lbl">Email</div><div class="mf-val">${o.email}</div></div>
+      <div class="mf"><div class="mf-lbl">Vendedor</div><div class="mf-val">${o.closer}</div></div>
+      <div class="mf"><div class="mf-lbl">Entrada</div><div class="mf-val">${o.created}</div></div>
+      <div class="mf"><div class="mf-lbl">Días en pipeline</div><div class="mf-val">${daysInPipeline}d</div></div>
+      <div class="mf"><div class="mf-lbl">Valor</div><div class="mf-val">${o.value>0?fmtEur(o.value):'—'}</div></div>
+    </div>`;
+  document.getElementById('modalBg').classList.add('on');
+}
+function closeModal(e) {
+  if(!e||e.target===document.getElementById('modalBg')) document.getElementById('modalBg').classList.remove('on');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+function loadUsers() {
+  fetch('/admin/users').then(r=>r.json()).then(users=>{
+    document.getElementById('usersBody').innerHTML = users.map(u=>`
+      <tr>
+        <td>${u.id}</td>
+        <td style="color:var(--white)">${u.username}</td>
+        <td>${u.email||'—'}</td>
+        <td><span class="badge" style="background:${u.role==='admin'?'rgba(239,68,68,.15)':'rgba(59,130,246,.15)'};color:${u.role==='admin'?'var(--red)':'var(--pipe)'}">${u.role}</span></td>
+        <td>${u.created_at?.slice(0,10)||'—'}</td>
+        <td class="num"><button class="btn-sm" onclick="deleteUser(${u.id},'${u.username}')">Eliminar</button></td>
+      </tr>`).join('');
+  });
+}
+function createUser() {
+  const u=document.getElementById('nu').value.trim(), pw=document.getElementById('np').value, em=document.getElementById('ne').value, role=document.getElementById('nr').value;
+  if(!u||!pw){showToast('Usuario y contraseña requeridos');return;}
+  fetch('/admin/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:pw,email:em,role})})
+    .then(r=>r.json()).then(d=>{if(d.ok){showToast('Usuario creado');loadUsers();document.getElementById('nu').value='';document.getElementById('np').value='';document.getElementById('ne').value='';}else showToast(d.error);});
+}
+function deleteUser(id,name) {
+  if(!confirm(`¿Eliminar usuario "${name}"?`))return;
+  fetch(`/admin/users/${id}`,{method:'DELETE'}).then(r=>r.json()).then(d=>{if(d.ok){showToast('Usuario eliminado');loadUsers();}else showToast(d.error);});
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('global-filter-bar').style.display='flex';
+  document.querySelectorAll('.clientes-filter').forEach(el=>el.style.display='none');
+  renderPipeline();
+});
+</script>
+</body>
+</html>

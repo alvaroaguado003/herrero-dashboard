@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: herrero-dashboard
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GHL_TOKEN
+        sync: false
+      - key: GHL_LOCATION_ID
+        value: YXM7CtkzqZwuvW7XBrFf
+      - key: PIPELINE_ID
+        value: sy43mg1hzwROLvmbnKaM
+      - key: CLIENTES_PIPELINE_ID
+        value: zeJs5CrqWj7vNZWdAPo4
+      - key: DB_PATH
+        value: /tmp/dashboard.db
+      - key: IG_TOKEN
+        sync: false
+      - key: IG_ACCOUNT_ID
+        sync: false
+      - key: SHEET_DISPAROS
+        sync: false
+      - key: SHEET_CONVERSACIONES
+        sync: false
+      - key: SHEET_AGENDAS
+        sync: false
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASS
+        sync: false
