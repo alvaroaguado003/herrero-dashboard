@@ -681,6 +681,7 @@ function renderPipeline() {
 
   // Timeline chart (30 days)
   const tl = buildTimeline(fp, 30);
+  const tlMax = Math.max(1, ...tl.total, ...tl.ventas);
   mkChart('tlChart', {
     type:'bar',
     data:{labels:tl.labels,datasets:[
@@ -689,7 +690,7 @@ function renderPipeline() {
     ]},
     options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:{
       x:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9}}},
-      y:{grid:{color:CC.grid},min:0,ticks:{color:CC.tick,font:{size:9},stepSize:1,precision:0,callback:function(v){return Number.isInteger(v)?v:''}}}
+      y:{grid:{color:CC.grid},min:0,max:Math.ceil(tlMax)+1,ticks:{color:CC.tick,font:{size:9},stepSize:1}}
     }}
   });
 
