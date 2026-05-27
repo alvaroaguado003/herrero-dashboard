@@ -282,7 +282,59 @@ input.field:focus,select.field:focus{border-color:var(--red)}
     <div class="frate" style="--c:var(--lost)"><div class="frate-pct" id="rLost">—</div><div class="frate-title">% Perdidas</div><div class="frate-sub">perdidas / total</div></div>
   </div>
 
-  <div class="g2 mb2 gap">
+  <div class="sh gap">Embudo de Conversión</div>
+  <div class="chart-card mb2" id="funnelVisual" style="padding:28px 32px">
+    <div style="display:flex;gap:32px;align-items:center">
+      <div style="flex-shrink:0;position:relative;width:200px;height:220px">
+        <svg viewBox="0 0 200 220" style="width:100%;height:100%">
+          <polygon points="5,5 195,5 168,58 32,58"     fill="#64748b" opacity="0.9"/>
+          <polygon points="32,64 168,64 148,112 52,112" fill="#2563EB" opacity="0.9"/>
+          <polygon points="52,118 148,118 132,160 68,160" fill="#ea580c" opacity="0.9"/>
+          <polygon points="68,166 132,166 118,210 82,210" fill="#22d36a" opacity="0.9"/>
+          <text x="100" y="36"  text-anchor="middle" fill="white" font-family="Montserrat" font-weight="900" font-size="12" id="fv-total-n">—</text>
+          <text x="100" y="92"  text-anchor="middle" fill="white" font-family="Montserrat" font-weight="900" font-size="12" id="fv-agenda-n">—</text>
+          <text x="100" y="143" text-anchor="middle" fill="white" font-family="Montserrat" font-weight="900" font-size="11" id="fv-real-n">—</text>
+          <text x="100" y="193" text-anchor="middle" fill="white" font-family="Montserrat" font-weight="900" font-size="10" id="fv-won-n">—</text>
+        </svg>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.25);border-radius:6px">
+          <div style="width:10px;height:10px;border-radius:2px;background:#64748b;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:8px;font-family:'JetBrains Mono',monospace;color:#94a3b8;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px">Total pipeline</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--white);line-height:1" id="fv-total-big">—</div>
+          </div>
+          <div style="text-align:right"><div style="font-size:8px;color:var(--text2);font-family:'JetBrains Mono',monospace">100%</div><div style="font-size:9px;color:var(--text2)">base</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:6px">
+          <div style="width:10px;height:10px;border-radius:2px;background:#2563EB;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:8px;font-family:'JetBrains Mono',monospace;color:#2563EB;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px">Llamadas agendadas</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--white);line-height:1" id="fv-agenda-big">—</div>
+          </div>
+          <div style="text-align:right"><div style="font-size:10px;font-weight:700;color:#2563EB;font-family:'JetBrains Mono',monospace" id="fv-agenda-pct">—</div><div style="font-size:9px;color:var(--text2)">vs total</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(234,88,12,.08);border:1px solid rgba(234,88,12,.2);border-radius:6px">
+          <div style="width:10px;height:10px;border-radius:2px;background:#ea580c;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:8px;font-family:'JetBrains Mono',monospace;color:#ea580c;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px">Llamadas realizadas</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--white);line-height:1" id="fv-real-big">—</div>
+          </div>
+          <div style="text-align:right"><div style="font-size:10px;font-weight:700;color:#ea580c;font-family:'JetBrains Mono',monospace" id="fv-real-pct">—</div><div style="font-size:9px;color:var(--text2)">show rate</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(34,211,106,.08);border:1px solid rgba(34,211,106,.2);border-radius:6px">
+          <div style="width:10px;height:10px;border-radius:2px;background:#22d36a;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:8px;font-family:'JetBrains Mono',monospace;color:#22d36a;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px">Ventas cerradas</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--white);line-height:1" id="fv-won-big">—</div>
+          </div>
+          <div style="text-align:right"><div style="font-size:10px;font-weight:700;color:#22d36a;font-family:'JetBrains Mono',monospace" id="fv-won-pct">—</div><div style="font-size:9px;color:var(--text2)">conv. global</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 mb2">
     <div class="chart-card"><div class="chart-title">Línea temporal</div><div class="chart-sub">oportunidades nuevas · ventas cerradas</div><canvas id="tlChart" height="190"></canvas></div>
     <div class="chart-card"><div class="chart-title">Distribución por etapa</div><div class="chart-sub">% estado actual del pipeline</div><canvas id="donutChart" height="190"></canvas></div>
   </div>
@@ -601,6 +653,19 @@ function renderPipeline() {
   document.getElementById('rShow').textContent  = fmtPct(pct(realizadas,agendas+nsp+realizadas||1));
   document.getElementById('rCierre').textContent= fmtPct(pct(ventas,realizadas||1));
   document.getElementById('rLost').textContent  = fmtPct(pct(cancelado+perdida,total||1));
+
+  // ── Funnel visual ──
+  document.getElementById('fv-total-n').textContent   = fmtN(total);
+  document.getElementById('fv-agenda-n').textContent  = fmtN(agendas);
+  document.getElementById('fv-real-n').textContent    = fmtN(realizadas);
+  document.getElementById('fv-won-n').textContent     = fmtN(ventas);
+  document.getElementById('fv-total-big').textContent  = fmtN(total);
+  document.getElementById('fv-agenda-big').textContent = fmtN(agendas);
+  document.getElementById('fv-real-big').textContent   = fmtN(realizadas);
+  document.getElementById('fv-won-big').textContent    = fmtN(ventas);
+  document.getElementById('fv-agenda-pct').textContent = fmtPct(pct(agendas,   total||1));
+  document.getElementById('fv-real-pct').textContent   = fmtPct(pct(realizadas, agendas||1));
+  document.getElementById('fv-won-pct').textContent    = fmtPct(pct(ventas,     total||1));
 
   document.getElementById('pSub').textContent =
     `${fmtN(total)} oportunidades · ${fmtN(ventas)} cerradas · ${fmtPct(pct(ventas,total||1))} conversión`;
