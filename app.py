@@ -56,6 +56,7 @@ _cache = {}
 
 # ── DB ────────────────────────────────────────────────────────────────────────
 def get_db():
+
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
@@ -86,6 +87,9 @@ def init_db():
             pass  # user already exists
 
     conn.close()
+
+# Ejecutar init_db al importar el módulo (funciona con gunicorn y python directo)
+init_db()
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 def login_required(f):
