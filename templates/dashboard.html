@@ -689,7 +689,7 @@ function renderPipeline() {
     ]},
     options:{responsive:true,plugins:{legend:{labels:{color:CC.tick,font:{size:9}}}},scales:{
       x:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9}}},
-      y:{grid:{color:CC.grid},ticks:{color:CC.tick,font:{size:9},stepSize:1,precision:0},min:0}
+      y:{grid:{color:CC.grid},min:0,ticks:{color:CC.tick,font:{size:9},stepSize:1,precision:0,callback:function(v){return Number.isInteger(v)?v:''}}}
     }}
   });
 
